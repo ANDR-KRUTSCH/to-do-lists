@@ -20,7 +20,7 @@ class NewVisitorTest(unittest.TestCase):
 
         # He sees that a title of the home page says about To-Do Lists 
         self.assertIn('To-Do', self.browser.title)
-        self.fail()
+        self.fail('Finish test')
 
         # This app offer him to enter a list's item
 
