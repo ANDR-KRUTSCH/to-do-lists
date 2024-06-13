@@ -24,7 +24,7 @@ class NewVisitorTest(unittest.TestCase):
         # He sees that a title of the home page says about To-Do Lists 
         self.assertIn('To-Do', self.browser.title)
         header_text = self.browser.find_element(By.TAG_NAME, 'h1')
-        self.assertIn('To-Do', header_text)
+        self.assertIn('To-Do', header_text.text)
 
         # This app offer him to enter a list's item
         inputbox = self.browser.find_element(By.ID, 'id_new_item')
@@ -39,7 +39,7 @@ class NewVisitorTest(unittest.TestCase):
 
         table = self.browser.find_element(By.ID, 'id_list_table')
         rows = table.find_elements(By.TAG_NAME, 'tr')
-        self.assertTrue(any(row.text == '1: I have to learn TDD') for row in rows)
+        self.assertTrue(any(row.text == '1: I have to learn TDD' for row in rows))
 
         # The page still offering to enter a new list's item.
         # He entering: "I have to learn FastAPI".
