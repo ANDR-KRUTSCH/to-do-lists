@@ -15,6 +15,11 @@ class NewVisitorTest(unittest.TestCase):
         '''uninstalling'''
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_text):
+        table = self.browser.find_element(By.ID, 'id_list_table')
+        rows = table.find_elements(By.TAG_NAME, 'tr')
+        self.assertIn(row_text, [row.text for row in rows])
+
     def test_can_start_a_list_and_retrieve_it_later(self):
         '''can start list and retrieve it later'''
 
@@ -36,10 +41,7 @@ class NewVisitorTest(unittest.TestCase):
         # When he presses Enter keyboard button, the page updates and then list contains: "I have to learn TDD".
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
-
-        table = self.browser.find_element(By.ID, 'id_list_table')
-        rows = table.find_elements(By.TAG_NAME, 'tr')
-        self.assertTrue(any(row.text == '1: I have to learn TDD' for row in rows))
+        self.check_for_row_in_list_table(row_text='1: I have to learn TDD')
 
         # The page still offering to enter a new list's item.
         # He entering: "I have to learn FastAPI".
@@ -50,9 +52,8 @@ class NewVisitorTest(unittest.TestCase):
         time.sleep(1)
 
         # Then the page updates again and list contains two items now.
-        table = self.browser.find_element(By.ID, 'id_list_table')
-        rows = table.find_elements(By.TAG_NAME, 'tr')
-        self.assertTrue(any(row.text == '2: I have to learn FastAPI') for row in rows)
+        self.check_for_row_in_list_table(row_text='1: I have to learn TDD')
+        self.check_for_row_in_list_table(row_text='2: I have to learn FastAPI')
 
         self.fail('Finish test!')
 
