@@ -31,7 +31,7 @@ class NewVisitorTest(LiveServerTestCase):
                     raise e
                 time.sleep(0.5)
 
-    def test_can_start_a_list_and_retrieve_it_later(self):
+    def test_can_start_a_list_for_one_user(self):
         '''can start list and retrieve it later'''
 
         # Andrew have known about a new cool web-app with To-Do Lists. He disided to check it's home page. 
