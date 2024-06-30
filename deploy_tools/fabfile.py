@@ -1,7 +1,7 @@
 import random
 from fabric import Connection
 
-c = Connection(host='127.0.0.1', user='krutsch', connect_kwargs={'key_filename': '/home/krutsch/.ssh/id_rsa'})
+c = Connection(host='localhost', user='krutsch', connect_kwargs={'key_filename': '/home/krutsch/.ssh/id_rsa'})
 
 REPO_URL = 'https://github.com/ANDR-KRUTSCH/to-do-lists.git'
 
