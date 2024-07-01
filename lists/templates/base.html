@@ -14,10 +14,10 @@
                     <div class="text-center">
                         <h1>{% block header_text %}{% endblock %}</h1>
                         <form action="{% block form_action %}{% endblock %}" method="post">
-                            <input type="text" name="item_text" id="id_new_item" placeholder="Enter a to-do item" class="form-control input-lg" />
-                            {% csrf_token %}{% if error %}
+                            {{ form.as_p }}
+                            {% csrf_token %}{% if form.errors %}
                             <div class="form-group has-error">
-                                <span class="help-block">{{ error }}</span>
+                                <span class="help-block">{{ form.text.errors }}</span>
                             </div>{% endif %}
                         </form>            
                     </div>
