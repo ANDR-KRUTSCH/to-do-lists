@@ -3,7 +3,6 @@ from django.urls import reverse
 
 # Create your models here.
 class List(models.Model):
-    pass
 
     def get_absolute_url(self):
         return reverse('view_list', args=[str(self.pk)])
