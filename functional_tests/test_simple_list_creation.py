@@ -19,7 +19,7 @@ class NewVisitorTest(FunctionalTest):
         self.assertIn('To-Do', header_text.text)
 
         # This app offer him to enter a list's item
-        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox = self.get_item_input_box()
         self.assertEqual(inputbox.get_attribute('placeholder'), 'Enter a to-do item')
 
         # He entering to text-field: "I have to learn TDD"
@@ -31,7 +31,7 @@ class NewVisitorTest(FunctionalTest):
 
         # The page still offering to enter a new list's item.
         # He entering: "I have to learn FastAPI".
-        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox = self.get_item_input_box()
         self.assertEqual(inputbox.get_attribute('placeholder'), 'Enter a to-do item')
         inputbox.send_keys('I have to learn FastAPI')
         inputbox.send_keys(Keys.ENTER)
@@ -47,7 +47,7 @@ class NewVisitorTest(FunctionalTest):
         
         # Andrew starts the new list
         self.browser.get(self.live_server_url)
-        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox = self.get_item_input_box()
         inputbox.send_keys('I have to learn TDD')
         inputbox.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: I have to learn TDD')
@@ -69,7 +69,7 @@ class NewVisitorTest(FunctionalTest):
         self.assertNotIn('I have to learn FastAPI', page_text)
 
         # Leon starts the new list by inputing a new item. It's less interesting then Andrew's list
-        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox = self.get_item_input_box()
         inputbox.send_keys('I have to find a well paid job')
         inputbox.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: I have to find a well paid job')
