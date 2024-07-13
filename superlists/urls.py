@@ -22,4 +22,5 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     re_path('^$', views.home_page, name='home'),
     re_path('^lists/', include('lists.urls')),
+    re_path('^accounts/', include('accounts.urls')),
 ]
