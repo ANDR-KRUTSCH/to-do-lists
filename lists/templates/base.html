@@ -13,10 +13,13 @@
                 <div class="container-fluid">
                     <a class="navbar-brand" href="/">Superlists</a>
                     {% if user.email %}
-                    <ul class="nav navbar-nav navbar-right">
-                        <li class="navbar-text">Logged in as {{ user.email }}</li>
-                        <li><a href="#" id="id_logout">Log out</a></li>
-                    </ul>
+                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="navbar-text">Logged in as {{ user.email }}</li>
+                            <li><a href="#"><input type="submit" value="Log out" id="id_logout"></a></li>
+                        </ul>
+                    </form>
                     {% endif %}
                     <form class="navbar-form navbar-right" method="post" action="{% url 'send_login_email' %}">
                         <span>Enter email to log in:</span>
