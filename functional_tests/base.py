@@ -2,6 +2,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
+from .server_tools import reset_database
 import os
 import time
 
@@ -15,13 +16,12 @@ class FunctionalTest(StaticLiveServerTestCase):
         '''installing'''
         self.browser = webdriver.Firefox()
         self.staging_server = os.environ.get('STAGING_SERVER')
-        self.password = os.environ.get('PASSWORD')
-        if self.staging_server:
+        if self.staging_server is not None:
+            self.password = os.environ.get('PASSWORD')
+            self.assertNotEqual(self.password, None)
             self.live_server_url = 'http://' + self.staging_server
-            if self.staging_server == 'localhost':
-                self.hostname = 'www.staging.to-do-lists.com'
-            elif self.staging_server == '127.0.0.1':
-                self.hostname = 'www.live.to-do-lists.com'
+            reset_database(self.staging_server)
+            self.hostname = 'www.staging.to-do-lists.com'
 
     def tearDown(self):
         '''uninstalling'''

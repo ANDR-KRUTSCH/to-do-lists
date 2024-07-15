@@ -26,19 +26,21 @@ class LoginTest(FunctionalTest):
             self.assertIn('Use this link to log in', email.body)
             url_search = re.search(r'http://.+/.+$', email.body)
         else:
-            if self.password is None:
-                self.fail()
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname=self.staging_server, port=80, username='krutsch', password=self.password)
+            ssh.connect(hostname=self.staging_server, port=22, username='krutsch', password=self.password)
             sftp = ssh.open_sftp()
             ls = sftp.listdir(path=f'/home/krutsch/sites/{self.hostname}/')
             for file_name in ls:
-                if '.log' in file:
+                if '.log' in file_name and 'access' not in file_name and 'error' not in file_name:
                     file = sftp.open(filename=f'/home/krutsch/sites/{self.hostname}/{file_name}', mode='r')
                     email = file.read().decode()
+                    sftp.remove(f'/home/krutsch/sites/{self.hostname}/{file_name}')
+                    file.close()
+                    sftp.close()
+                    ssh.close()
                     self.assertIn('Use this link to log in', email)
-                    url_search = re.search(r'http://.+/.+$', email)
+                    url_search = re.search(r'http://.+/.+', email)
 
         # It contains a link
         if not url_search:
