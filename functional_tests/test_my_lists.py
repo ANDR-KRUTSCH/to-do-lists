@@ -11,7 +11,7 @@ class MyListsTest(FunctionalTest):
         if self.staging_server:
             session_key = create_session_on_server(self.staging_server, email)
         else:
-            session_key = create_pre_authenticated_session(email)
+            session_key = create_pre_authenticated_session(email=email)
         self.browser.get(self.live_server_url + '/404_no_such_url/')
         self.browser.add_cookie(
             dict(
