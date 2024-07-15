@@ -14,9 +14,14 @@ class FunctionalTest(StaticLiveServerTestCase):
     def setUp(self):
         '''installing'''
         self.browser = webdriver.Firefox()
-        staging_server = os.environ.get('STAGING_SERVER')
-        if staging_server:
-            self.live_server_url = 'http://' + staging_server
+        self.staging_server = os.environ.get('STAGING_SERVER')
+        self.password = os.environ.get('PASSWORD')
+        if self.staging_server:
+            self.live_server_url = 'http://' + self.staging_server
+            if self.staging_server == 'localhost':
+                self.hostname = 'www.staging.to-do-lists.com'
+            elif self.staging_server == '127.0.0.1':
+                self.hostname = 'www.live.to-do-lists.com'
 
     def tearDown(self):
         '''uninstalling'''

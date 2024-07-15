@@ -1,4 +1,5 @@
 import re
+import paramiko
 from django.core import mail
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -18,13 +19,28 @@ class LoginTest(FunctionalTest):
         self.wait_for(lambda: self.assertIn('Check your email', self.browser.find_element(By.TAG_NAME, 'body').text))
 
         # Andrew checks his email and findes a message
-        email = mail.outbox[0]
-        self.assertIn(TEST_EMAIL, email.to)
-        self.assertEqual(email.subject, SUBJECT)
+        if self.staging_server is None:
+            email = mail.outbox[0]
+            self.assertIn(TEST_EMAIL, email.to)
+            self.assertEqual(email.subject, SUBJECT)
+            self.assertIn('Use this link to log in', email.body)
+            url_search = re.search(r'http://.+/.+$', email.body)
+        else:
+            if self.password is None:
+                self.fail()
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(hostname=self.staging_server, port=80, username='krutsch', password=self.password)
+            sftp = ssh.open_sftp()
+            ls = sftp.listdir(path=f'/home/krutsch/sites/{self.hostname}/')
+            for file_name in ls:
+                if '.log' in file:
+                    file = sftp.open(filename=f'/home/krutsch/sites/{self.hostname}/{file_name}', mode='r')
+                    email = file.read().decode()
+                    self.assertIn('Use this link to log in', email)
+                    url_search = re.search(r'http://.+/.+$', email)
 
         # It contains a link
-        self.assertIn('Use this link to log in', email.body)
-        url_search = re.search(r'http://.+/.+$', email.body)
         if not url_search:
             self.fail()
         url = url_search.group(0)
