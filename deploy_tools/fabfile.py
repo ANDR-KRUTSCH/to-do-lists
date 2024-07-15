@@ -12,11 +12,13 @@ def _create_directory_structure_if_necessary(site_folder: str) -> None:
 def _get_latest_source(source_folder: str) -> None:
     result = c.run(f'ls -a -m {source_folder}')
     if '.git' in result.stdout:
-        c.run(f'cd {source_folder} && git fetch')
+        c.run(f'cd {source_folder} && git restore ./superlists/settings.py')
+        c.run(f'cd {source_folder} && git pull')
+        # c.run(f'cd {source_folder} && git fetch')
     else:
         c.run(f'git clone {REPO_URL} {source_folder}')
-    current_commit = c.run(f'cd {source_folder} && git log -n 1 --format=%H')
-    c.run(f'cd {source_folder} && git reset --hard {current_commit.stdout}')
+    # current_commit = c.run(f'cd {source_folder} && git log -n 1 --format=%H')
+    # c.run(f'cd {source_folder} && git reset --hard {current_commit.stdout}')
 
 def _update_settings(source_folder: str) -> None:
     settings_path = source_folder + '/superlists/settings.py'
