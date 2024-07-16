@@ -141,9 +141,22 @@ class NewListTest(TestCase):
         response = self.client.post('/lists/new', data={'text': ''})
         self.assertIsInstance(response.context['form'], ItemForm)
 
+    def test_list_owner_is_saved_if_user_is_authenticated(self):
+        user = User.objects.create(email='andr.krutsch@gmail.com')
+        self.client.force_login(user)
+        self.client.post('/lists/new', data={'text': 'new item'})
+        list_ = List.objects.first()
+        self.assertEqual(list_.owner, user)
+
 
 class MyListsTest(TestCase):
     def test_my_lists_url_renders_my_lists_template(self):
-        email = 'andr.krutsch@gmail.com'
-        response = self.client.get(f'/lists/users/{email}/')
+        user = User.objects.create(email='andr.krutsch@gmail.com')
+        response = self.client.get(f'/lists/users/{user.email}/')
         self.assertTemplateUsed(response, 'my_lists.html')
+
+    def test_passes_correct_owner_to_template(self):
+        User.objects.create(email='temp@gmail.com')
+        correct_user = User.objects.create(email='andr.krutsch@gmail.com')
+        response = self.client.get(f'/lists/users/{correct_user.email}/')
+        self.assertEqual(response.context['owner'], correct_user)
