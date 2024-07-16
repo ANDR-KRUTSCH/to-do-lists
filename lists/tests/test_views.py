@@ -2,7 +2,9 @@ from django.test import TestCase
 from lists.models import Item, List
 from django.utils.html import escape
 from lists.forms import ItemForm, ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
-from unittest import skip
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 # Create your tests here.
 class HomePageTest(TestCase):
@@ -138,3 +140,10 @@ class NewListTest(TestCase):
     def test_for_invalid_input_passes_form_to_template(self):
         response = self.client.post('/lists/new', data={'text': ''})
         self.assertIsInstance(response.context['form'], ItemForm)
+
+
+class MyListsTest(TestCase):
+    def test_my_lists_url_renders_my_lists_template(self):
+        email = 'andr.krutsch@gmail.com'
+        response = self.client.get(f'/lists/users/{email}/')
+        self.assertTemplateUsed(response, 'my_lists.html')
