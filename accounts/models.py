@@ -7,8 +7,14 @@ class User(models.Model):
 
     REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'
-    is_anonymous = False
-    is_authenticated = False
+    
+    @property
+    def is_anonymous(self):
+        return False
+    
+    @property
+    def is_authenticated(self):
+        return True
 
 
 class Token(models.Model):

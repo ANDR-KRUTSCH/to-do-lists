@@ -1,6 +1,7 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
 from .server_tools import reset_database
 import os
@@ -70,3 +71,10 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.browser.find_element(By.NAME, 'email')
         navbar = self.browser.find_element(By.CSS_SELECTOR, '.navbar')
         self.assertNotIn(email, navbar.text)
+
+    def add_list_item(self, item_text: str):
+        num_rows = len(self.browser.find_elements(By.CSS_SELECTOR, '#id_list_table tr'))
+        self.get_item_input_box().send_keys(item_text)
+        self.get_item_input_box().send_keys(Keys.ENTER)
+        num_rows += 1
+        self.wait_for_row_in_list_table(row_text=f'{num_rows}: {item_text}')

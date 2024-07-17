@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from lists.models import List
-from lists.forms import ItemForm, ExistingListItemForm
-from django.http import HttpRequest, HttpResponse
+from lists.forms import ItemForm, ExistingListItemForm, NewListForm
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -20,16 +20,24 @@ def view_list(request: HttpRequest, list_id) -> HttpResponse:
             return redirect(list_)
     return render(request, 'list.html', {'list': list_, 'form': form})
 
-def new_list(request: HttpRequest) -> HttpResponse:
-    form = ItemForm(data=request.POST)
+# def new_list(request: HttpRequest) -> HttpResponse:
+#     form = ItemForm(data=request.POST)
+#     if form.is_valid():
+#         list_ = List()
+#         if request.user.is_authenticated:
+#             list_.owner = request.user
+#         list_.save()
+#         form.save(for_list=list_)
+#         return redirect(list_)
+#     else:
+#         return render(request, 'home.html', {'form': form})
+    
+def new_list(request: HttpRequest) -> HttpResponseRedirect:
+    form = NewListForm(data=request.POST)
     if form.is_valid():
-        list_ = List()
-        list_.owner = request.user
-        list_.save()
-        form.save(for_list=list_)
+        list_ = form.save(owner=request.user)
         return redirect(list_)
-    else:
-        return render(request, 'home.html', {'form': form})
+    return render(request, 'home.html', {'form': form})
     
 def my_lists(request: HttpRequest, email: str) -> HttpResponse:
     owner = User.objects.get(email=email)

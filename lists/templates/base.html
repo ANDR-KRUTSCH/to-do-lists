@@ -16,7 +16,7 @@
                     <form action="{% url 'logout' %}" method="post" style="display: inline;">
                         {% csrf_token %}
                         <ul class="nav navbar-nav navbar-left">
-                            <li><a href="{% url 'my_lists' user.email %}">My lists</a></li>
+                            <li><a href="{% url 'my_lists' user.email %}">My Lists</a></li>
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
                             <li class="navbar-text">Logged in as {{ user.email }}</li>
