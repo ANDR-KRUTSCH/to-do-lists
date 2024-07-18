@@ -21,7 +21,6 @@ class ListPage(object):
         self.test.assertIn(row_text, [row.text for row in rows])
 
     def get_item_input_box(self):
-        print(self.test.browser.current_url)
         return self.test.browser.find_element(By.CSS_SELECTOR, 'input[name="text"]')
     
     def add_list_item(self, item_text: str) -> Self:

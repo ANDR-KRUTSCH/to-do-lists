@@ -1,7 +1,8 @@
 from django.test import TestCase
-from django.core.exceptions import ValidationError
-from lists.models import Item, List
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+
+from lists.models import Item, List
 
 User = get_user_model()
 
@@ -94,3 +95,13 @@ class ListModelTest(TestCase):
         Item.objects.create(text='First', list=list_)
         Item.objects.create(text='Second', list=list_)
         self.assertEqual(list_.name, 'First')
+
+    def test_list_has_shared_with(self):
+        list_ = List()
+        self.assertTrue(hasattr(list_, 'shared_with'))
+
+    def test_list_shared_with_add(self):
+        user = User.objects.create(email='andr.krutsch@gmail.com')
+        list_ = List.objects.create(owner=user)
+        list_.shared_with.add(email=user.email)
+        self.assertIn(user, list_.shared_with.all())

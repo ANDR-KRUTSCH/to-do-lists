@@ -1,8 +1,10 @@
-from django.test import TestCase
-from lists.forms import ItemForm, ExistingListItemForm, NewListForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
-from lists.models import List, Item
-from unittest.mock import Mock, patch
 import unittest
+from unittest.mock import Mock, patch
+
+from django.test import TestCase
+
+from lists.models import List, Item
+from lists.forms import ItemForm, ExistingListItemForm, NewListForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
 
 class ItemFormTest(TestCase):
     

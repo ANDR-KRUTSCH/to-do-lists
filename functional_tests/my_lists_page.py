@@ -1,7 +1,6 @@
 from typing import Self
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 
 from .base import FunctionalTest
 

@@ -29,7 +29,7 @@ class SharingTest(FunctionalTest):
         self.browser.get(self.live_server_url)
         list_page = ListPage(test=self).add_list_item(item_text='I have to find a well-paid job.')
 
-        # He sees an option "Share this list"
+        # He sees an option "Share with"
         share_box = list_page.get_share_box()
         self.assertEqual(share_box.get_attribute('placeholder'), 'your-friend@example.com')
 

@@ -1,17 +1,19 @@
-from django.test import TestCase
-from lists.models import Item, List
-from django.utils.html import escape
-from lists.forms import ItemForm, ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
-from django.contrib.auth import get_user_model
-from unittest.mock import Mock, patch
-from django.http.request import HttpRequest
-from lists.views import new_list
 import unittest
+from unittest.mock import Mock, patch
+
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.http.request import HttpRequest
+from django.utils.html import escape
+
+from lists.models import Item, List
+from lists.forms import ItemForm, ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
+from lists.views import new_list
 
 User = get_user_model()
 
 # Create your tests here.
-class HomePageTest(TestCase):
+class HomePageViewTest(TestCase):
 
     def test_user_home_template(self):
         response = self.client.get('/')
@@ -23,7 +25,6 @@ class HomePageTest(TestCase):
 
 
 class ListViewTest(TestCase):
-    '''List view test'''
 
     def post_invalid_input(self):
         list_ = List.objects.create()
@@ -113,7 +114,6 @@ class ListViewTest(TestCase):
 
 
 class NewListViewIntegratedTest(TestCase):
-    '''New list test'''
 
     def test_can_save_a_POST_request(self):
         self.client.post('/lists/new', data={'text': 'A new list item'})
@@ -155,7 +155,7 @@ class NewListViewIntegratedTest(TestCase):
         self.assertEqual(list_.owner, user)
 
 
-class MyListsTest(TestCase):
+class MyListsViewTest(TestCase):
     def test_my_lists_url_renders_my_lists_template(self):
         user = User.objects.create(email='andr.krutsch@gmail.com')
         response = self.client.get(f'/lists/users/{user.email}/')
@@ -215,3 +215,39 @@ class NewListViewUnitTest(unittest.TestCase):
 
         new_list(request=self.request)
         self.assertFalse(mock_form.save.called)
+
+
+class ShareListViewTest(TestCase):
+
+    def test_POST_redirects_to_list_page(self) -> None:
+        user = User.objects.create(email='andr.krutsch@gmail.com')
+        list_ = List.objects.create(owner=user)
+        self.client.force_login(user=user)
+        response = self.client.post(path=f'/lists/{list_.pk}/share', data={'sharee': user.email})
+        self.assertRedirects(response, list_.get_absolute_url())
+
+    def test_can_share_list_with_user(self):
+        user = User.objects.create(email='andr.krutsch@gmail.com')
+        list_ = List.objects.create(owner=user)
+        self.client.force_login(user=user)
+        self.client.post(path=f'/lists/{list_.pk}/share', data={'sharee': user.email})
+        self.assertIn(user, list_.shared_with.all())
+
+    def test_incorrect_list_id_raises_404(self):
+        user = User.objects.create(email='andr.krutsch@gmail.com')
+        self.client.force_login(user=user)
+        response = self.client.post(path=f'/lists/0/share', data={'sharee': user.email})
+        self.assertEqual(response.status_code, 404)
+
+    def test_returns_400_if_sharing_with_non_existing_user(self):
+        user = User.objects.create(email='andr.krutsch@gmail.com')
+        list_ = List.objects.create(owner=user)
+        self.client.force_login(user=user)
+        response = self.client.post(path=f'/lists/{list_.pk}/share')
+        self.assertEqual(response.status_code, 400)
+
+    def test_only_authenticated_users_can_share_lists(self):
+        user = User.objects.create(email='andr.krutsch@gmail.com')
+        list_ = List.objects.create(owner=user)
+        response = self.client.post(path=f'/lists/{list_.pk}/share', data={'sharee': user.email})
+        self.assertEqual(response.headers.get('Location'), '/accounts/login/?next=/lists/1/share')
