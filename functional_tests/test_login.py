@@ -1,15 +1,19 @@
 import re
 import paramiko
+
 from django.core import mail
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
 from .base import FunctionalTest
 
 TEST_EMAIL = 'andr.krutsch@gmail.com'
 SUBJECT = 'Your login link for Superlists'
 
 class LoginTest(FunctionalTest):
-    def test_can_get_email_link_to_log_in(self):
+
+    def test_can_get_email_link_to_log_in(self) -> None:
         # Andrew opens the site and notices Log-in in nav-bar. It waits for an email from him and he inputes it
         self.browser.get(self.live_server_url)
         self.browser.find_element(By.NAME, 'email').send_keys(TEST_EMAIL)
