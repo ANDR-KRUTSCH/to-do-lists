@@ -19,6 +19,18 @@ from selenium.webdriver.remote.webelement import WebElement
 
 MAX_WAIT = 10
 
+def wait(fn: Callable) -> Callable:
+    def modified_fn(*args, **kwargs) -> Any:
+        start_time = time.time()
+        while True:
+            try:
+                return fn(*args, **kwargs)
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise e
+                time.sleep(0.5)
+    return modified_fn
+
 class FunctionalTest(StaticLiveServerTestCase):
 
     def setUp(self) -> None:
@@ -33,18 +45,6 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def tearDown(self) -> None:
         self.browser.quit()
-
-    def wait(fn: Callable) -> Callable:
-        def modified_fn(*args, **kwargs) -> Any:
-            start_time = time.time()
-            while True:
-                try:
-                    return fn(*args, **kwargs)
-                except (AssertionError, WebDriverException) as e:
-                    if time.time() - start_time > MAX_WAIT:
-                        raise e
-                    time.sleep(0.5)
-        return modified_fn
 
     def wait_for_row_in_list_table(self, row_text: str) -> None:
         start_time = time.time()
