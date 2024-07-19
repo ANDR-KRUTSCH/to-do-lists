@@ -1,10 +1,11 @@
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.contrib import auth, messages
 from django.core.mail import send_mail
 from django.urls import reverse
 
 from accounts.models import Token
+from accounts.authentication import PasswordlessAuthenticationBackend
 
 # Create your views here.
 def send_login_email(request: HttpRequest) -> HttpResponseRedirect:
@@ -22,7 +23,7 @@ def send_login_email(request: HttpRequest) -> HttpResponseRedirect:
     return redirect(to='/')
 
 def login(request: HttpRequest) -> HttpResponseRedirect:
-    user = auth.authenticate(uid=request.GET.get('token'))
+    user = PasswordlessAuthenticationBackend().authenticate(uid=request.GET.get('token'))
     if user:
         auth.login(request=request, user=user)
     return redirect(to='/')
