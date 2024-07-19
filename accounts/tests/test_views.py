@@ -50,25 +50,31 @@ class SendLoginEmailViewTest(TestCase):
         self.assertIn(expected_url, message)
 
 
+@patch('accounts.views.PasswordlessAuthenticationBackend')
 @patch('accounts.views.auth')
 class LoginViewTest(TestCase):
-    def test_redirects_to_home_page(self, mock_auth: Mock) -> None:
+    def test_redirects_to_home_page(self, mock_auth: Mock, mock_PasswordlessAuthenticationBackend: Mock) -> None:
         response = self.client.get(path='/accounts/login?token=abcd123')
         
         self.assertRedirects(response, '/')
 
-    def test_calls_authenticate_with_uid_from_get_request(self, mock_auth: Mock) -> None:
+    def test_calls_authenticate_with_uid_from_get_request(self, mock_auth: Mock, mock_PasswordlessAuthenticationBackend: Mock) -> None:
+        mock_passwordless_authentication_backend = mock_PasswordlessAuthenticationBackend.return_value
+        
         self.client.get(path='/accounts/login?token=abcd123')
         
-        self.assertEqual(mock_auth.authenticate.call_args, call(uid='abcd123'))
+        self.assertEqual(mock_passwordless_authentication_backend.authenticate.call_args, call(uid='abcd123'))
 
-    def test_calls_auth_login_with_user_if_there_is_one(self, mock_auth: Mock) -> None:
+    def test_calls_auth_login_with_user_if_there_is_one(self, mock_auth: Mock, mock_PasswordlessAuthenticationBackend: Mock) -> None:
+        mock_passwordless_authentication_backend = mock_PasswordlessAuthenticationBackend.return_value
+
         response = self.client.get(path='/accounts/login?token=abcd123')
         
-        self.assertEqual(mock_auth.login.call_args, call(request=response.wsgi_request, user=mock_auth.authenticate.return_value))
+        self.assertEqual(mock_auth.login.call_args, call(request=response.wsgi_request, user=mock_passwordless_authentication_backend.authenticate.return_value))
 
-    def test_does_not_login_if_user_is_not_authenticated(self, mock_auth: Mock) -> None:
-        mock_auth.authenticate.return_value = None
+    def test_does_not_login_if_user_is_not_authenticated(self, mock_auth: Mock, mock_PasswordlessAuthenticationBackend: Mock) -> None:
+        mock_passwordless_authentication_backend = mock_PasswordlessAuthenticationBackend.return_value
+        mock_passwordless_authentication_backend.authenticate.return_value = None
         
         self.client.get(path='/accounts/login?token=abcd123')
         
