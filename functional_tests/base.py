@@ -14,6 +14,7 @@ from .management.commands.create_session import create_pre_authenticated_session
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.firefox.service import Service
 
 MAX_WAIT = 10
 
@@ -32,8 +33,11 @@ def wait(func: Callable) -> Callable:
 class FunctionalTest(StaticLiveServerTestCase):
 
     def setUp(self) -> None:
-        self.browser = webdriver.Firefox()
+        service = Service(executable_path='/usr/local/bin/geckodriver')
+        self.browser = webdriver.Firefox(service=service)
+
         self.staging_server = os.environ.get('STAGING_SERVER')
+        
         if self.staging_server is not None:
             self.password = os.environ.get('PASSWORD')
             self.assertNotEqual(self.password, None)
