@@ -13,31 +13,31 @@ User = get_user_model()
 def home_page(request: HttpRequest) -> HttpResponse:
     return render(request, 'home.html', {'form': ItemForm()})
 
-def view_list(request: HttpRequest, list_id: int) -> HttpResponse:
+def view_list(request: HttpRequest, list_id: int) -> HttpResponse | HttpResponseRedirect:
     list_ = List.objects.get(id=list_id)
     form = ExistingListItemForm(for_list=list_)
     if request.method == 'POST':
         form = ExistingListItemForm(for_list=list_, data=request.POST)
         if form.is_valid():
             form.save()
-            return redirect(list_)
-    return render(request, 'list.html', {'list': list_, 'form': form})
+            return redirect(to=list_)
+    return render(request=request, template_name='list.html', context={'list': list_, 'form': form})
     
-def new_list(request: HttpRequest) -> HttpResponseRedirect:
+def new_list(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     form = NewListForm(data=request.POST)
     if form.is_valid():
         list_ = form.save(owner=request.user)
-        return redirect(list_)
-    return render(request, 'home.html', {'form': form})
+        return redirect(to=list_)
+    return render(request=request, template_name='home.html', context={'form': form})
     
 def my_lists(request: HttpRequest, email: str) -> HttpResponse:
     owner = User.objects.get(email=email)
-    return render(request, 'my_lists.html', {'owner': owner})
+    return render(request=request, template_name='my_lists.html', context={'owner': owner})
 
 @require_POST
 @login_required
-def share_list(request: HttpRequest, list_id: int) -> HttpResponseRedirect:
-    list_ = get_object_or_404(List, pk=list_id)
+def share_list(request: HttpRequest, list_id: int) -> HttpResponseRedirect | HttpResponseBadRequest:
+    list_ = get_object_or_404(klass=List, pk=list_id)
     email = request.POST.get('sharee')
     try:
         list_.shared_with.add(email=request.user.pk)

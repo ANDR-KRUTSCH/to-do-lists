@@ -196,7 +196,7 @@ class NewListViewUnitTest(unittest.TestCase):
         response = new_list(request=self.request)
         
         self.assertEqual(response, mock_redirect.return_value)
-        mock_redirect.assert_called_once_with(mock_form.save.return_value)
+        mock_redirect.assert_called_once_with(to=mock_form.save.return_value)
 
     @patch('lists.views.render')
     def test_renders_home_template_with_form_if_form_invalid(self, mock_render: Mock, mock_NewListForm: Mock) -> None:
@@ -206,7 +206,7 @@ class NewListViewUnitTest(unittest.TestCase):
         response = new_list(request=self.request)
 
         self.assertEqual(response, mock_render.return_value)
-        mock_render.assert_called_once_with(self.request, 'home.html', {'form': mock_form})
+        mock_render.assert_called_once_with(request=self.request, template_name='home.html', context={'form': mock_form})
 
     @patch('lists.views.render')
     def test_does_not_save_if_form_invalid(self, mock_render: Mock, mock_NewListForm: Mock) -> None:

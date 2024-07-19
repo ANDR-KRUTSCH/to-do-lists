@@ -1,6 +1,8 @@
+from typing import Self
+
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.urls import reverse
 
@@ -12,16 +14,16 @@ class List(models.Model):
     _shared_with = models.ManyToManyField(User, related_name='lists_with_users')
 
     @staticmethod
-    def create_new(first_item_text: str, owner: AbstractUser = None):
+    def create_new(first_item_text: str, owner: AbstractUser = None) -> Self:
         list_ = List.objects.create(owner=owner)
         Item.objects.create(text=first_item_text, list=list_)
         return list_
 
-    def get_absolute_url(self):
-        return reverse('view_list', args=[str(self.pk)])
+    def get_absolute_url(self) -> str:
+        return reverse(viewname='view_list', args=[str(self.pk)])
     
     @property
-    def name(self):
+    def name(self) -> str:
         return self.item_set.first().text
     
     @property
@@ -49,5 +51,5 @@ class Item(models.Model):
         ordering = ('id',)
         unique_together = ('text', 'list')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.text
