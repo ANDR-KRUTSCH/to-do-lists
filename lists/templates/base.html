@@ -8,71 +8,84 @@
         <link rel="stylesheet" href="/static/base.css">
     </head>
     <body>
+
         <div class="container">
             <nav class="navbar navbar-default" role="navigation">
                 <div class="container-fluid">
                     <a class="navbar-brand" href="/">Superlists</a>
-                    {% if user.email %}
-                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                        {% csrf_token %}
-                        <ul class="nav navbar-nav navbar-left">
-                            <li><a href="{% url 'my_lists' user.email %}">My Lists</a></li>
-                        </ul>
-                        <ul class="nav navbar-nav navbar-right">
-                            <li class="navbar-text">Logged in as {{ user.email }}</li>
-                            <li><a href="#"><input type="submit" value="Log out" id="id_logout"></a></li>
-                        </ul>
-                    </form>
+                    {% if request.user.is_authenticated %}
+                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <ul class="nav navbar-nav navbar-left">
+                                <li><a href="{% url 'my_lists' user.email %}">My Lists</a></li>
+                            </ul>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="navbar-text">Logged in as {{ user.email }}</li>
+                                <li><a href="#"><input type="submit" value="Log out" id="id_logout"></a></li>
+                            </ul>
+                        </form>
                     {% else %}
-                    <form class="navbar-form navbar-right" method="post" action="{% url 'send_login_email' %}">
-                        <span>Enter email to log in:</span>
-                        <input class="form-control" name="email" type="text">
-                        {% csrf_token %}
-                    </form>
+                        <form class="navbar-form navbar-right" method="post" action="{% url 'send_login_email' %}">
+                            <span>Enter email to log in:</span>
+                            <input class="form-control" name="email" type="text">
+                            {% csrf_token %}
+                        </form>
                     {% endif %}
                 </div>
             </nav>
             {% if messages %}
-            <div class="row">
-                <div class="col-md-8">
-                    {% for message in messages %}
-                    {% if message.level_tag == 'success' %}
-                        <div class="alert alert-success">{{ message }}</div>
-                    {% else %}
-                        <div class="alert alert-warning">{{ message }}</div>
-                    {% endif %}
-                    {% endfor %}
+                <div class="row">
+                    <div class="col-md-8">
+                        {% for message in messages %}
+                            {% if message.level_tag == 'success' %}
+                                <div class="alert alert-success">{{ message }}</div>
+                            {% else %}
+                                <div class="alert alert-warning">{{ message }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
-            </div>
             {% endif %}
             <div class="row">
                 <div class="col-md-6 col-md-offset-3 jumbotron">
                     <div class="text-center">
                         <h1>{% block header_text %}{% endblock %}</h1>
                         {% block list_form %}
-                        <form action="{% block form_action %}{% endblock %}" method="post">
-                            {{ form.text }}
-                            {% csrf_token %}{% if form.errors %}
-                            <div class="form-group has-error"><div class="help-block">{{ form.text.errors }}</div></div>{% endif %}
-                        </form>
+                            <form name="item_form" method="post" action="{% block form_action %}{% endblock %}">
+                                {{ form.text }}
+                                {% csrf_token %}
+                                <div class="form-group has-error">
+                                    {% if form.errors %}
+                                        <div class="help-block">{{ form.text.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </form>
                         {% endblock %}
                     </div>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-md-6 col-md-offset-3">{% block table %}{% endblock %}</div>
             </div>
+
             <div class="row">
                 <div class="col-md-6 col-md-offset-3">{% block extra_content %}{% endblock %}</div>
             </div>
         </div>
-        <script src="/static/jquery-3.7.1.min.js"></script>
-        <script src="/static/list.js"></script>
 
-        <script>
-            $(document).ready(function(){
-                window.Superlists.initialize();
-            });
-        </script>
+        <!-- <script src="/static/jquery-3.7.1.min.js"></script>
+        <script src="/static/list.js"></script> -->
+
+        {% block scripts %}
+            <script>
+                window.addEventListener('load', () => {
+                    window.document.querySelector('input[name="text"]').addEventListener('input', () => {
+                        let divHasError = window.document.querySelector('.has-error');
+                        divHasError.hidden = true;
+                    });
+                });
+            </script>
+        {% endblock %}
     </body>
 </html>

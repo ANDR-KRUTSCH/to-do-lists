@@ -22,7 +22,8 @@ from lists import views
 urlpatterns = [
     # path('admin/', admin.site.urls),
     # re_path('^$', views.home_page, name='home'),
-    re_path('^$', views.HomePage.as_view(), name='home'),
-    re_path('^lists/', include('lists.urls')),
-    re_path('^accounts/', include('accounts.urls')),
+    re_path(route=r'^$', view=views.HomePage.as_view(), name='home'),
+    re_path(route=r'^api/', view=include('lists.api_urls')),
+    re_path(route=r'^lists/', view=include('lists.urls')),
+    re_path(route=r'^accounts/', view=include('accounts.urls')),
 ]

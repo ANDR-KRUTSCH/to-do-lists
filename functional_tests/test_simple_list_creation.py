@@ -18,10 +18,10 @@ class NewVisitorTest(FunctionalTest):
         # This app offer him to enter a list's item
         self.assertEqual(list_page.get_item_input_box().get_attribute('placeholder'), 'Enter a to-do item')
 
-        # He entering to text-field: "I have to learn TDD"
+        # He entering text to field
         list_page.add_list_item('I have to find a well-paid job.')
 
-        # When he presses Enter keyboard button, the page updates and then list contains: "I have to learn TDD".
+        # When he presses Enter keyboard button, the page updates and then list contains: "I have to find a well-paid job.".
         list_page.wait_for_row_in_list_table(item_text='I have to find a well-paid job.', item_number=1)
 
         # The page still offering to enter a new list's item.

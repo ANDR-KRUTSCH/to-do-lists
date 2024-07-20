@@ -1,9 +1,6 @@
-from typing import Self
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
-from django.conf import settings
 from django.urls import reverse
 
 User = get_user_model()
@@ -14,7 +11,7 @@ class List(models.Model):
     _shared_with = models.ManyToManyField(User, related_name='lists_with_users')
 
     @staticmethod
-    def create_new(first_item_text: str, owner: AbstractUser = None) -> Self:
+    def create_new(first_item_text: str, owner: AbstractUser = None):
         list_ = List.objects.create(owner=owner)
         Item.objects.create(text=first_item_text, list=list_)
         return list_

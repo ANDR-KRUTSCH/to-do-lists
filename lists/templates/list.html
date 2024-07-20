@@ -5,10 +5,12 @@
 {% block form_action %}{% url 'view_list' list.id %}{% endblock %}
 
 {% block table %}
-    <table id="id_list_table" class="table">{% for i in list.item_set.all %}
-        <tr>
-            <td>{{ forloop.counter }}: {{ i.text }}</td>
-        </tr>{% endfor %}
+    <table id="id_list_table" class="table">
+        {% for i in list.item_set.all %}
+            <tr>
+                <td>{{ forloop.counter }}: {{ i.text }}</td>
+            </tr>
+        {% endfor %}
     </table>
 {% endblock %}
 
@@ -29,4 +31,91 @@
             </div>
         {% endfor %}
     </ul>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        async function sendRequestGetResponse() {
+
+            let text = window.document.querySelector('input[name="text"]');
+
+            let formData = new FormData();
+            formData.append('text', text.value);
+
+            let response = await fetch("{% url 'api_list' list.pk %}", {
+                mode: "same-origin",
+                method: 'POST',
+                headers: {'X-CSRFToken': window.csrftoken},
+                body: formData,
+            });
+
+            text.value = '';
+
+            if (response.status === 201) {
+                let response = await fetch("{% url 'api_list' list.pk %}", {
+                    mode: "same-origin",
+                    method: 'GET',
+                });
+
+                if (response.status === 200) {
+                    return await response.json();
+                };
+            } else {
+                let json = await response.json();
+
+                let ul = window.document.createElement('ul');
+                let li = window.document.createElement('li');
+
+                li.innerHTML = json['text'][0];
+
+                ul.append(li);
+                
+                let divHelpBlock = window.document.createElement('div');
+                divHelpBlock.className = 'help-block'
+                divHelpBlock.append(ul);
+
+                let divHasError = window.document.querySelector('.has-error');
+                divHasError.append(divHelpBlock);
+                divHasError.hidden = false;
+            };
+        };
+
+        window.addEventListener('load', () => {
+            window.document.querySelector('input[name="text"]').addEventListener('input', () => {
+                let divHasError = window.document.querySelector('.has-error');
+                divHasError.hidden = true;
+            });
+
+            let windowDocumentCookie = window.document.cookie.split(' ');
+
+            for (let item of windowDocumentCookie){
+                if (item.startsWith('csrftoken=')){
+                    window.csrftoken = item.split('=')[1];
+                    break;
+                };
+            };
+
+            window.document.forms.namedItem('item_form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                let result = await sendRequestGetResponse();
+
+                if (result) {
+                    let keys = Object.keys(result);
+
+                    let table = window.document.querySelector('#id_list_table').querySelector('tbody');
+
+                    table.innerHTML = '';
+                        
+                    for (let key of keys) {
+                        let tr = window.document.createElement('tr');
+                        let td = window.document.createElement('td');
+                        td.textContent = `${key}: ${result[key].text}`;
+                        tr.append(td);
+                        table.append(tr);
+                    };
+                };
+            });
+        });
+    </script>
 {% endblock %}
