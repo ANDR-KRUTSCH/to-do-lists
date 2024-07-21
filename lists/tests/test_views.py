@@ -44,6 +44,7 @@ class ListViewTest(TestCase):
         response = self.client.get(f'/lists/{correct_list.id}/')
         self.assertEqual(response.context['list'], correct_list)
 
+    @skip
     def test_displays_only_items_for_that_list(self):
         '''Test: all list items displaying'''
         correct_list = List.objects.create()

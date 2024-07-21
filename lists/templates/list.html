@@ -28,7 +28,7 @@
 {% block scripts %}
     <script>
         async function getItems() {
-            let response = await fetch("{% url 'api_list' list.pk %}", {
+            let response = await fetch("{% url 'get_items' list.pk %}", {
                 mode: "same-origin",
                 method: 'GET',
             });
@@ -37,7 +37,7 @@
         };
 
         async function postItem(formData) {
-            let response = await fetch("{% url 'api_list' list.pk %}", {
+            let response = await fetch("{% url 'post_item' list.pk %}", {
                 mode: "same-origin",
                 method: 'POST',
                 headers: {
@@ -50,16 +50,19 @@
         };
 
         async function displayItems(data) {
-            if (typeof(data) !== 'object') return;
+            if (!data instanceof Array) return;
+            // if (!data instanceof Object) return;
             if (data.length === 0) return;
 
             let table = window.document.querySelector('#id_list_table');
             table.innerHTML = '';
 
-            let keys = Object.keys(data);
-            for (let key of keys) {
+            // let keys = Object.keys(data);
+            // for (let key of keys) {
+            for (let i = 0; i < data.length; i++) {
                 let td = window.document.createElement('td');
-                td.textContent = `${key}: ${data[key].text}`;
+                // td.textContent = `${key}: ${data[key].text}`;
+                td.textContent = `${i + 1}: ${data[i].text}`;
 
                 let tr = window.document.createElement('tr');
                 tr.append(td);
@@ -69,7 +72,7 @@
         };
 
         async function displayErrors(data) {
-            if (typeof(data) !== 'object') return;
+            if (!data instanceof Object) return;
             if (data.length === 0) return;
             
             let li = window.document.createElement('li');
@@ -111,6 +114,8 @@
                 let response = await postItem(formData);
 
                 if (response.status === 201) {
+                    textInput.value = '';
+
                     let result = await getItems();
 
                     await displayItems(result);
