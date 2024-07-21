@@ -1,17 +1,9 @@
 {% extends 'base.html' %}
 
-{% block header_text %}Your To-Do list{% endblock %}
-
-{% block form_action %}{% url 'view_list' list.id %}{% endblock %}
+{% block header_text %}Your To-Do List{% endblock %}
 
 {% block table %}
-    <table id="id_list_table" class="table">
-        {% for i in list.item_set.all %}
-            <tr>
-                <td>{{ forloop.counter }}: {{ i.text }}</td>
-            </tr>
-        {% endfor %}
-    </table>
+    <table id="id_list_table" class="table"></table>
 {% endblock %}
 
 {% block extra_content %}
@@ -35,85 +27,97 @@
 
 {% block scripts %}
     <script>
-        async function sendRequestGetResponse() {
+        async function getItems() {
+            let response = await fetch("{% url 'api_list' list.pk %}", {
+                mode: "same-origin",
+                method: 'GET',
+            });
 
-            let text = window.document.querySelector('input[name="text"]');
+            if (response.status === 200) return await response.json();
+        };
 
-            let formData = new FormData();
-            formData.append('text', text.value);
-
+        async function postItem(formData) {
             let response = await fetch("{% url 'api_list' list.pk %}", {
                 mode: "same-origin",
                 method: 'POST',
-                headers: {'X-CSRFToken': window.csrftoken},
+                headers: {
+                    'X-CSRFToken': window.csrftoken,
+                },
                 body: formData,
             });
 
-            text.value = '';
+            return response;
+        };
 
-            if (response.status === 201) {
-                let response = await fetch("{% url 'api_list' list.pk %}", {
-                    mode: "same-origin",
-                    method: 'GET',
-                });
+        async function displayItems(data) {
+            if (typeof(data) !== 'object') return;
+            if (data.length === 0) return;
 
-                if (response.status === 200) {
-                    return await response.json();
-                };
-            } else {
-                let json = await response.json();
+            let table = window.document.querySelector('#id_list_table');
+            table.innerHTML = '';
 
-                let ul = window.document.createElement('ul');
-                let li = window.document.createElement('li');
+            let keys = Object.keys(data);
+            for (let key of keys) {
+                let td = window.document.createElement('td');
+                td.textContent = `${key}: ${data[key].text}`;
 
-                li.innerHTML = json['text'][0];
+                let tr = window.document.createElement('tr');
+                tr.append(td);
 
-                ul.append(li);
-                
-                let divHelpBlock = window.document.createElement('div');
-                divHelpBlock.className = 'help-block'
-                divHelpBlock.append(ul);
-
-                let divHasError = window.document.querySelector('.has-error');
-                divHasError.append(divHelpBlock);
-                divHasError.hidden = false;
+                table.append(tr);
             };
         };
 
-        window.addEventListener('load', () => {
+        async function displayErrors(data) {
+            if (typeof(data) !== 'object') return;
+            if (data.length === 0) return;
+            
+            let li = window.document.createElement('li');
+            li.textContent = data['text'][0];
+
+            let ul = window.document.createElement('ul');
+            ul.className = 'errorlist';
+            ul.append(li);
+                
+            let divHelpBlock = window.document.createElement('div');
+            divHelpBlock.className = 'help-block'
+            divHelpBlock.append(ul);
+
+            let divHasError = window.document.querySelector('.has-error');
+            divHasError.append(divHelpBlock);
+            divHasError.hidden = false;
+        };
+
+        window.addEventListener('load', async () => {
+            let result = await getItems();
+
+            await displayItems(result);
+
+            window.csrftoken = window.document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
             window.document.querySelector('input[name="text"]').addEventListener('input', () => {
                 let divHasError = window.document.querySelector('.has-error');
                 divHasError.hidden = true;
             });
 
-            let windowDocumentCookie = window.document.cookie.split(' ');
-
-            for (let item of windowDocumentCookie){
-                if (item.startsWith('csrftoken=')){
-                    window.csrftoken = item.split('=')[1];
-                    break;
-                };
-            };
-
             window.document.forms.namedItem('item_form').addEventListener('submit', async (event) => {
                 event.preventDefault();
 
-                let result = await sendRequestGetResponse();
+                let textInput = window.document.querySelector('input[name="text"]');
 
-                if (result) {
-                    let keys = Object.keys(result);
+                let formData = new FormData();
+                formData.append('text', textInput.value);
 
-                    let table = window.document.querySelector('#id_list_table').querySelector('tbody');
+                let response = await postItem(formData);
 
-                    table.innerHTML = '';
-                        
-                    for (let key of keys) {
-                        let tr = window.document.createElement('tr');
-                        let td = window.document.createElement('td');
-                        td.textContent = `${key}: ${result[key].text}`;
-                        tr.append(td);
-                        table.append(tr);
-                    };
+                if (response.status === 201) {
+                    let result = await getItems();
+
+                    await displayItems(result);
+                } else {
+                    let result = await response.json();
+
+                    await displayErrors(result);
                 };
             });
         });
